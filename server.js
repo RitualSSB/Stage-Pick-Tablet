@@ -1,6 +1,12 @@
 const express = require('express');
-const app = express();
+const php = require('node-php');
 const path = require('path');
+
+const app = express();
+
+// Load PHP
+app.use('/starters.php', php.cgi('php82/php-cgi'));
+app.use('/counterpicks.php', php.cgi('php82/php-cgi'));
 
 // serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));

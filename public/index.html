@@ -11,22 +11,10 @@
     
 <div class="stage-container">
     <div class="starter-container">
-        <?php
-            $directory = "Starters";
-            $images = glob($directory . "/*.png");
-            foreach($images as $image){
-                echo '<div class="stage"><img src="'.$image.'" alt="'.$image.'"></div>';
-            }
-        ?>
+        <?php include("starters.php"); ?>
     </div>
     <div class="counterpick-container">
-        <?php
-            $directory = "Counterpicks";
-            $images = glob($directory . "/*.png");
-            foreach($images as $image){
-                echo '<div class="stage"><img src="'.$image.'" alt="'.$image.'"></div>';
-            }
-        ?>
+        <?php include("counterpicks.php"); ?>
     </div>
     <div class="reset-container">
         <button id="reset-btn">Reset</button>
