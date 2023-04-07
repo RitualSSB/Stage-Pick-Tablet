@@ -11,11 +11,13 @@
     <div class="starter-container"></div>
     <div class="counterpick-container"></div>
   </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type='text/javascript' src='obs-websocket.js'></script>
   <script>
+    const socket = io();
     const startersContainer = document.querySelector('.starter-container');
     const counterpicksContainer = document.querySelector('.counterpick-container');
     const stages = document.querySelectorAll('.stage');
-
 
     // Function to create a container with an image inside
     function createImageContainer(src) {
@@ -39,16 +41,31 @@
     stage.classList.remove('disabled');
     const strike = stage.querySelector('.strike');
     strike.remove();
+    const isDisabled = false;
+    socket.emit('strike', stage.id, isDisabled);
   } else {
     // add the strike functionality
     stage.classList.add('disabled');
     const strike = document.createElement('div');
     strike.classList.add('strike');
     stage.appendChild(strike);
+    const isDisabled = true;
+    socket.emit('strike', stage.id, isDisabled);
   }
 }
 
-
+    // handle 'strike' event received from server
+      socket.on('strike', (stageId) => {
+        const stage = document.getElementById(stageId);
+        if (stage) {
+          const strike = stage.querySelector('.strike');
+          if (strike) {
+            stage.classList.add('disabled');
+          } else {
+            stage.classList.remove('disabled');
+          }
+        }
+      });
 
     // Get all PNG images in Starters folder
     fetch('Starters')
@@ -77,7 +94,23 @@
           counterpicksContainer.appendChild(container);
         });
       });
+
+    // handle 'strike' event received from server
+socket.on('strike', (stageId, isDisabled) => {
+  const stage = document.getElementById(stageId);
+  if (stage) {
+    if (isDisabled) {
+      stage.classList.add('disabled');
+      const strike = document.createElement('div');
+      strike.classList.add('strike');
+      stage.appendChild(strike);
+    } else {
+      stage.classList.remove('disabled');
+      const strike = stage.querySelector('.strike');
+      strike.remove();
+    }
+  }
+});
   </script>
-  <script type='text/javascript' src='obs-websocket.js'></script>
 </body>
 </html>
