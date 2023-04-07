@@ -1,27 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="style.css">
 <head>
-    <title>Stagelist</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <title>Stagelist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="style.css">
 </head>
-
 <body>
-    
-<div class="stage-container">
-    <div class="starter-container">
-        <?php include("starters.php"); ?>
-    </div>
-    <div class="counterpick-container">
-        <?php include("counterpicks.php"); ?>
-    </div>
+  <div class="stage-container">
+    <div class="starter-container"></div>
+    <div class="counterpick-container"></div>
     <div class="reset-container">
-        <button id="reset-btn">Reset</button>
+      <button id="reset-btn">Reset</button>
     </div>
-</div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    const startersContainer = document.querySelector('.starter-container');
+    const counterpicksContainer = document.querySelector('.counterpick-container');
 
-<script src="app.js"></script>
+    // Function to create a container with an image inside
+    function createImageContainer(src) {
+      const container = document.createElement('div');
+      container.classList.add('stage');
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = src;
+      container.appendChild(img);
+      return container;
+    }
+
+    // Get all PNG images in Starters folder
+    fetch('/Starters')
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const images = doc.querySelectorAll('a[href$=".png"]');
+        images.forEach(image => {
+          const src = `Starters/${image.textContent}`;
+          const container = createImageContainer(src);
+          startersContainer.appendChild(container);
+        });
+      });
+
+    // Get all PNG images in Counterpicks folder
+    fetch('/Counterpicks')
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const images = doc.querySelectorAll('a[href$=".png"]');
+        images.forEach(image => {
+          const src = `Counterpicks/${image.textContent}`;
+          const container = createImageContainer(src);
+          counterpicksContainer.appendChild(container);
+        });
+      });
+  </script>
 </body>
-
 </html>

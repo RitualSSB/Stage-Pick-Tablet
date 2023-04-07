@@ -5,12 +5,12 @@ const path = require('path');
 const app = express();
 
 // Load PHP
-app.use('/starters.php', php.cgi('php82/php-cgi'));
-app.use('/counterpicks.php', php.cgi('php82/php-cgi'));
 
 // serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(__dirname, 'Starters')));
+app.use(express.static(path.join(__dirname, 'Counterpicks')));
+app.use(express.static(path.join(__dirname, 'img')));
 // handle GET request to '/' route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
