@@ -1,71 +1,72 @@
 body {
-	background-color: #333;
-	margin: 0;
-	padding: 0;
+    background-color: #333;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
 }
 
 .stage-container {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
-	margin: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
 }
 
 .starter-container, .counterpick-container {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.starter-container {
+    flex-basis: 100%;
 }
 
 .stage {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 5px;
-	padding: 5px;
-	border: 8px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    padding: 5px;
+    border: 8px solid transparent;
+    position: relative;
 }
 
 .starter-container .stage {
-	border-color: #0f0;
+    border-color: #0f0;
 }
 
 .counterpick-container .stage {
-	border-color: #ff0;
+    border-color: #ff0;
 }
 
 .stage img {
-	width: 100%;
-	height: auto;
+    width: 100%;
+    height: auto;
+    opacity: 1;
+}
+
+.stage.disabled img {
+    opacity: 0.5;
 }
 
 .strike {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-image: url("strike.png");
-	background-size: contain;
-	background-repeat: no-repeat;
-	z-index: 2;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("strike.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 2;
 }
 
-.reset-container {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
-	margin-top: 20px;
-}
-
-#reset-btn {
-	padding: 10px 20px;
-	font-size: 18px;
-	background-color: #fff;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
+.stage.disabled {
+    border-color: red;
 }

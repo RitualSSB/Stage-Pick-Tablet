@@ -10,18 +10,19 @@
   <div class="stage-container">
     <div class="starter-container"></div>
     <div class="counterpick-container"></div>
-    <div class="reset-container">
-      <button id="reset-btn">Reset</button>
-    </div>
   </div>
   <script>
     const startersContainer = document.querySelector('.starter-container');
     const counterpicksContainer = document.querySelector('.counterpick-container');
+    const stages = document.querySelectorAll('.stage');
+
 
     // Function to create a container with an image inside
     function createImageContainer(src) {
       const container = document.createElement('div');
       container.classList.add('stage');
+      container.addEventListener('touchstart', strikeOutStage);
+      container.addEventListener('click', strikeOutStage);
       const img = document.createElement('img');
       img.src = src;
       img.alt = src;
@@ -29,34 +30,54 @@
       return container;
     }
 
+    // Function to strike out a stage
+    function strikeOutStage(event) {
+  event.preventDefault();
+  const stage = event.currentTarget;
+  if (stage.classList.contains('disabled')) {
+    // clear the strike functionality
+    stage.classList.remove('disabled');
+    const strike = stage.querySelector('.strike');
+    strike.remove();
+  } else {
+    // add the strike functionality
+    stage.classList.add('disabled');
+    const strike = document.createElement('div');
+    strike.classList.add('strike');
+    stage.appendChild(strike);
+  }
+}
+
+
+
     // Get all PNG images in Starters folder
-    fetch('/Starters')
+    fetch('Starters')
       .then(response => response.text())
       .then(html => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const images = doc.querySelectorAll('a[href$=".png"]');
+        const images = doc.querySelectorAll('img[src$=".png"]');
         images.forEach(image => {
-          const src = `Starters/${image.textContent}`;
+          const src = `${image.getAttribute('src')}`;
           const container = createImageContainer(src);
           startersContainer.appendChild(container);
         });
       });
 
     // Get all PNG images in Counterpicks folder
-    fetch('/Counterpicks')
+    fetch('Counterpicks')
       .then(response => response.text())
       .then(html => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const images = doc.querySelectorAll('a[href$=".png"]');
+        const images = doc.querySelectorAll('img[src$=".png"]');
         images.forEach(image => {
-          const src = `Counterpicks/${image.textContent}`;
+          const src = `${image.getAttribute('src')}`;
           const container = createImageContainer(src);
           counterpicksContainer.appendChild(container);
         });
       });
   </script>
-  <script src="app.js"></script>
+  <script type='text/javascript' src='obs-websocket.js'></script>
 </body>
 </html>
