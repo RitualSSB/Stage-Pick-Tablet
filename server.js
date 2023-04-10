@@ -1,18 +1,19 @@
 const express = require('express');
-const php = require('node-php');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const http = require('http');
-const socketIO = require('socket.io');
+const socketio = require('socket.io');
+const { promisify } = require('util');
+
+const readdirAsync = promisify(fs.readdir);
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+const io = socketio(server);
 
 const StartersFolder = path.join(__dirname, 'Starters');
 const CounterpicksFolder = path.join(__dirname, 'Counterpicks');
-let strike = '';
 
 // serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -30,73 +31,29 @@ app.get('/', (req, res) => {
 });
 
 // handle GET request to '/Starters' route
-app.get('/Starters', (req, res) => {
-  const directoryPath = path.join(__dirname, 'Starters');
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      res.status(500).send('Internal Server Error');
-      return;
-    }
+app.get('/Starters', async (req, res) => {
+  try {
+    const files = await readdirAsync(StartersFolder);
     const images = files.filter(file => /\.(jpe?g|png|gif)$/i.test(file));
     const html = images.map(image => `<img src="/Starters/${image}">`).join('');
     res.send(html);
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // handle GET request to '/Counterpicks' route
-app.get('/Counterpicks', (req, res) => {
-  const directoryPath = path.join(__dirname, 'Counterpicks');
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      res.status(500).send('Internal Server Error');
-      return;
-    }
+app.get('/Counterpicks', async (req, res) => {
+  try {
+    const files = await readdirAsync(CounterpicksFolder);
     const images = files.filter(file => /\.(jpe?g|png|gif)$/i.test(file));
     const html = images.map(image => `<img src="/Counterpicks/${image}">`).join('');
     res.send(html);
-  });
-});
-
-// handle WebSocket connections
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  // send current strike to new client
-  socket.emit('strike', strike);
-
-  // handle strike event from clients
-  socket.on('strike', (newStrike) => {
-    strike = newStrike;
-    console.log(`Strike set to ${strike}`);
-    io.emit('strike', strike); // send strike to all connected clients
-  });
-
-  // handle 'click' event
-  socket.on('click', (data) => {
-    console.log(`Received click event from ${socket.id}: ${data}`);
-    
-    // broadcast click event to all connected clients
-    io.emit('click', data);
-      socket.on('click', (data) => {
-    console.log(`Received click event from ${socket.id}: ${data}`);
-    
-    // broadcast click event to all connected clients
-    io.emit('click', data);
-  });
-});
-  socket.on('touchstart', (data) => {
-    console.log(`Received touchstart event from ${socket.id}: ${data}`);
-    
-    // broadcast touchstart event to all connected clients
-    io.emit('touchstart', data);
-    socket.on('touchstart', (data) => {
-      console.log(`Received touchstart event from ${socket.id}: ${data}`);
-  });
-});
-  // handle disconnection
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // get the IPv4 address of the computer
@@ -111,9 +68,32 @@ Object.keys(interfaces).forEach((name) => {
   });
 });
 
+// broadcast strikeOutStage event to clients
+function strikeOutStage() {
+  io.emit('strikeOutStage');
+}
+
+// listen for click and touchstart events
+io.on('connection', (socket) => {
+  console.log(`Socket ${socket.id} connected.`);
+
+  socket.on('click', () => {
+    console.log(`Socket ${socket.id} clicked.`);
+    strikeOutStage();
+  });
+
+  socket.on('touchstart', () => {
+    console.log(`Socket ${socket.id} touched.`);
+    strikeOutStage();
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`Socket ${socket.id} disconnected.`);
+  });
+});
+
 // start server
 const port = process.env.PORT || 3000;
 server.listen(port, host, () => {
   console.log(`Server listening on http://${host}:${port}`);
 });
-

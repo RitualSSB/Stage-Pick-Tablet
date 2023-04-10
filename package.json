@@ -32,6 +32,7 @@
     "node-js": "^1.0.0",
     "obs-websocket-js": "^5.0.2",
     "os": "^0.1.2",
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.6.1",
+    "util": "^0.12.5"
   }
 }
