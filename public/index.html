@@ -16,7 +16,7 @@
     const startersContainer = document.querySelector('.starter-container');
     const counterpicksContainer = document.querySelector('.counterpick-container');
     const stages = document.querySelectorAll('.stage');
-    // Send the initial state of the stages to the server
+    // Receive the state of the stages from the server
   stages.forEach(stage => {
     const message = {
       action: 'strike',
@@ -61,6 +61,7 @@
         stage: stage.querySelector('img').getAttribute('src'),
         disabled: stage.classList.contains('disabled')
       };
+      console.log("I'm going to emit a message");
       socket.emit('message', message);
     }
 
