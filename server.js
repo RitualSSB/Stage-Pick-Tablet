@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
 // handle GET request to '/Starters' route
 app.get('/Starters', async (req, res) => {
   try {
-    const files = await readdirAsync(StartersFolder);
+    const files = await readdirAsync(STARTERS_PATH);
     const images = files.filter(file => /\.(jpe?g|png|gif)$/i.test(file));
     const html = images.map(image => `<img src="/Starters/${image}">`).join('');
     res.send(html);
@@ -48,7 +48,7 @@ app.get('/Starters', async (req, res) => {
 // handle GET request to '/Counterpicks' route
 app.get('/Counterpicks', async (req, res) => {
   try {
-    const files = await readdirAsync(CounterpicksFolder);
+    const files = await readdirAsync(COUNTERPICKS_PATH);
     const images = files.filter(file => /\.(jpe?g|png|gif)$/i.test(file));
     const html = images.map(image => `<img src="/Counterpicks/${image}">`).join('');
     res.send(html);
@@ -75,10 +75,14 @@ function strikeOutStage() {
   io.emit('strikeOutStage');
 }
 
+function broadcastUpdate() {
+  
+}
+
 // listen for click and touchstart events
 io.on('connection', (socket) => {
-  console.log(`Socket ${socket.id} connected.`);
-  console.log(stage_is_banned_dict);
+  socket.emit('update', stage_is_banned_dict);
+  console.log(`Socket ${socket.id} connected. Sending ban state.`);
 
   socket.on('click', () => {
     console.log(`Socket ${socket.id} clicked.`);
@@ -110,13 +114,11 @@ function initStageBans() {
 
 // Append unbanned stages from folder_name into an existing stage_is_banned_dict
 function populateStageIsBannedDict(folder_name, stage_is_banned_dict) {
-  console.log(path.join(__dirname, folder_name));
-
   try {
     const files = fs.readdirSync(path.join(__dirname, folder_name));
     const image_filenames = files.filter(file => /\.(jpe?g|png|gif)$/i.test(file));
-    image_filenames.forEach(element => stage_is_banned_dict[path.join(folder_name, element)] = false);
+    image_filenames.forEach(element => stage_is_banned_dict[path.join(folder_name, element)] = true);
   } catch (err) {
-    console.error("Failed to read " + folder_name + " folder: \n" + err);
+    console.error("Failed to read " + path.join(__dirname, folder_name) + " folder: \n" + err);
   }
 }

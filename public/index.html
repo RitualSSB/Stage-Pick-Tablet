@@ -94,7 +94,12 @@
       });
 
     // Listen for messages from the server
-    socket.on('message', message => {
+    socket.on('update', stage_is_banned_dict => {
+      Object.entries(stage_is_banned_dict).forEach(([stage, is_banned]) => {
+        console.log("The stage: " + stage);
+        console.log("is_banned? " + is_banned);
+      });
+      /*
       if (message.action === 'strike') {
         const stage = document.querySelector(`img[src="${message.stage}"]`).parentNode;
         if (message.disabled) {
@@ -109,7 +114,7 @@
           const strike = stage.querySelector('.strike');
           strike.remove();
         }
-      }
+      }*/
     });
   </script>
 </body>
