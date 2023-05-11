@@ -35,6 +35,7 @@ A Stage Select Tablet built in Node JS
     * GUI to Select Default Background Color
     * One Click QR Code Generation for Locals without dedicated device
     * Toggle UPNP or proper selfhosting. 
+##
 
 ##### For Any Confusion please contact @ritualcasts on twitter.
 
