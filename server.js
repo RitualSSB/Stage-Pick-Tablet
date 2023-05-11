@@ -5,6 +5,7 @@ const os = require("os");
 const http = require("http");
 const socketio = require("socket.io");
 const { promisify } = require("util");
+const UPnP = require("nat-upnp");
 
 const readdirAsync = promisify(fs.readdir);
 
@@ -93,6 +94,16 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`Socket ${socket.id} disconnected.`);
   });
+});
+
+//enable UPnP for remote devices
+const upnp = new UPnP();
+upnp.portMapping({ public: port, private: port, ttl: 3600 }, (err) => {
+  if (err) {
+    console.error("Failed to enable UPnP:", err);
+  } else {
+    console.log("UPnP port mapping enabled.");
+  }
 });
 
 // Start server
