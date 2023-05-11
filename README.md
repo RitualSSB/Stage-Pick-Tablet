@@ -20,4 +20,7 @@ A Stage Select Tablet built in Node JS
   To Connect on other devices, simply go to the link. (Note, you may have to port forward the available port utilizing UPnP for devices outside your local wifi network. 
   Optional: If you'd like, create a QR code for the link and add it to your stream setup station!
 
+####For Images I sourced from: https://www.ssbwiki.com/
+
 ##### For Any Confusion please contact @ritualcasts on twitter.
+
