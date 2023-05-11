@@ -1,5 +1,5 @@
 body {
-  background-color: #333;
+  background-color: #e4d7f1;
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -46,7 +46,7 @@ body {
 }
 
 .stage img {
-  width: 100%;
+  width: 200%;
   height: auto;
   opacity: 1;
   pointer-events: none;
