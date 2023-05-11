@@ -1,104 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Stagelist</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-  <div class="stage-container">
-    <div class="starter-container"></div>
-    <div class="counterpick-container"></div>
-  </div>
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const startersContainer = document.querySelector('.starter-container');
-    const counterpicksContainer = document.querySelector('.counterpick-container');
-    const stages = document.querySelectorAll('.stage');
-    // Receive the state of the stages from the server
-  stages.forEach(stage => {
-    const message = {
-      action: 'strike',
-      stage: stage.querySelector('img').getAttribute('src'),
-      disabled: stage.classList.contains('disabled')
-    };
-    socket.emit('message', message);
-  });
-    const socket = io();
+  <head>
+    <meta charset="utf-8" />
+    <title>Stagelist</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="stage-container">
+      <div class="starter-container"></div>
+      <div class="counterpick-container"></div>
+    </div>
+    <script>
+      const startersContainer = document.querySelector(".starter-container");
+      const counterpicksContainer = document.querySelector(
+        ".counterpick-container"
+      );
+      const socket = io();
+      var stages_initialized = false;
 
-    // Function to create a container with an image inside
-    function createImageContainer(src) {
-      const container = document.createElement('div');
-      container.classList.add('stage');
-      container.addEventListener('touchstart', strikeOutStage);
-      container.addEventListener('click', strikeOutStage);
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = src;
-      container.appendChild(img);
-      return container;
-    }
-
-    // Function to strike out a stage
-    function strikeOutStage(event) {
-      event.preventDefault();
-      const stage = event.currentTarget;
-      if (stage.classList.contains('disabled')) {
-        // clear the strike functionality
-        stage.classList.remove('disabled');
-        const strike = stage.querySelector('.strike');
-        strike.remove();
-      } else {
-        // add the strike functionality
-        stage.classList.add('disabled');
-        const strike = document.createElement('div');
-        strike.classList.add('strike');
-        stage.appendChild(strike);
+      // Function to create a container with an image inside
+      function createImageContainer(src) {
+        const container = document.createElement("div");
+        container.classList.add("stage");
+        container.addEventListener("touchstart", strikeOutStageEvent);
+        container.addEventListener("click", strikeOutStageEvent);
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = src;
+        img.id = src;
+        container.appendChild(img);
+        return container;
       }
-      const message = {
-        action: 'strike',
-        stage: stage.querySelector('img').getAttribute('src'),
-        disabled: stage.classList.contains('disabled')
-      };
-      console.log("I'm going to emit a message");
-      socket.emit('message', message);
-    }
 
-    // Get all PNG images in Starters folder
-    fetch('Starters')
-      .then(response => response.text())
-      .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const images = doc.querySelectorAll('img[src$=".png"]');
-        images.forEach(image => {
-          const src = `${image.getAttribute('src')}`;
-          const container = createImageContainer(src);
-          startersContainer.appendChild(container);
-        });
+      function initStages(stage_type, parent) {
+        return fetch(stage_type)
+          .then((response) => response.text())
+          .then((html) => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+            const images = doc.querySelectorAll('img[src$=".png"]');
+            images.forEach((image) => {
+              const src = image.getAttribute("src");
+              const container = createImageContainer(src);
+              parent.appendChild(container);
+            });
+          });
+      }
+
+      function updateStageBans(stage_bans_dict) {
+        Object.entries(stage_bans_dict).forEach(
+          ([stage, is_banned_on_server]) => {
+            const stage_element = document.getElementById(stage);
+            const is_banned_on_client =
+              stage_element.parentElement.classList.contains("disabled");
+            if (is_banned_on_server != is_banned_on_client) {
+              strikeOutStage(stage_element.parentElement);
+            }
+          }
+        );
+      }
+
+      // Function to strike out a stage
+      function strikeOutStageEvent(event) {
+        event.preventDefault();
+
+        // Immediately update strike on client-side
+        stage_container = event.currentTarget;
+        strikeOutStage(stage_container);
+
+        // Send update to server
+        const message = {
+          stage: stage_container.querySelector("img").id,
+          is_banned: stage_container.classList.contains("disabled"),
+        };
+        socket.emit("update", message);
+        console.log("emitting update");
+      }
+
+      function strikeOutStage(stage_container) {
+        if (stage_container.classList.contains("disabled")) {
+          // clear the strike functionality
+          stage_container.classList.remove("disabled");
+          const strike = stage_container.querySelector(".strike");
+          strike.remove();
+        } else {
+          // add the strike functionality
+          stage_container.classList.add("disabled");
+          const strike = document.createElement("div");
+          strike.classList.add("strike");
+          stage_container.appendChild(strike);
+        }
+      }
+
+      // the 'init' message will be sent on connection (or reconnection) to the server.
+      // We want to:
+      // 1) Dynamically populate the Starters and Counterpicks html
+      // 2) Synchronize the state of the bans with the server
+      socket.on("init", (stage_bans_dict) => {
+        console.log("init");
+        // We only want to add the stages on first connection. Otherwise we get duplicate stages on reconnection.
+        if (!stages_initialized) {
+          promise_starters = initStages("Starters", startersContainer);
+          promise_counterpicks = initStages(
+            "Counterpicks",
+            counterpicksContainer
+          );
+          stages_initialized = true;
+          // We await all stage elements to exist before trying to update them.
+          Promise.all([promise_starters, promise_counterpicks]).then(() => {
+            updateStageBans(stage_bans_dict);
+          });
+        } else {
+          updateStageBans(stage_bans_dict);
+        }
       });
 
-    // Get all PNG images in Counterpicks folder
-    fetch('Counterpicks')
-      .then(response => response.text())
-      .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const images = doc.querySelectorAll('img[src$=".png"]');
-        images.forEach(image => {
-          const src = `${image.getAttribute('src')}`;
-          const container = createImageContainer(src);
-          counterpicksContainer.appendChild(container);
-        });
+      socket.on("update", (stage_bans_dict) => {
+        console.log("updating");
+        console.log(stage_bans_dict);
+        updateStageBans(stage_bans_dict);
       });
 
-    // Listen for messages from the server
-    socket.on('update', stage_is_banned_dict => {
-      Object.entries(stage_is_banned_dict).forEach(([stage, is_banned]) => {
-        console.log("The stage: " + stage);
-        console.log("is_banned? " + is_banned);
-      });
       /*
       if (message.action === 'strike') {
         const stage = document.querySelector(`img[src="${message.stage}"]`).parentNode;
@@ -115,7 +139,6 @@
           strike.remove();
         }
       }*/
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
