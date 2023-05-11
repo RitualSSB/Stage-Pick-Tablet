@@ -1,8 +1,7 @@
 # Stage-Pick-Tablet
-### Authors:
-Ritual and FlatMochi
+  By: Ritual and FlatMochi
 
-### Overview:
+## Overview:
 A Stage Select Tablet built in Node JS
 
 ### Installation: 
@@ -20,7 +19,7 @@ A Stage Select Tablet built in Node JS
   To Connect on other devices, simply go to the link. (Note, you may have to port forward the available port utilizing UPnP for devices outside your local wifi network. 
   Optional: If you'd like, create a QR code for the link and add it to your stream setup station!
 
-#### For Images I sourced from: https://www.ssbwiki.com/
+  #### For Images I sourced from: https://www.ssbwiki.com/
 
 ## To Do:
 
