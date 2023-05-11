@@ -15,6 +15,7 @@ const io = socketio(server);
 const STARTERS_PATH = path.join(__dirname, "Starters");
 const COUNTERPICKS_PATH = path.join(__dirname, "Counterpicks");
 
+// Ground truth for the state of stage bans
 var stage_bans_dict = initStageBans();
 
 // serve static files from public directory
@@ -79,29 +80,13 @@ function strikeOutStage() {
   io.emit("strikeOutStage");
 }
 
-function broadcastUpdate() {}
-
-// listen for click and touchstart events
 io.on("connection", (socket) => {
+  // Always send current state on connection
   socket.emit("init", stage_bans_dict);
-  console.log(`Socket ${socket.id} connected. Sending ban state: `);
-  console.log(stage_bans_dict);
-
-  socket.on("click", () => {
-    console.log(`Socket ${socket.id} clicked.`);
-    strikeOutStage();
-  });
-
-  socket.on("touchstart", () => {
-    console.log(`Socket ${socket.id} touched.`);
-    strikeOutStage();
-  });
 
   socket.on("update", (message) => {
-    let stage = message.stage;
-    let is_banned_on_client = message.is_banned;
-    stage_bans_dict[stage] = is_banned_on_client;
-    console.log("broadcasting update");
+    stage_bans_dict[message.stage] = message.is_banned;
+    // Broadcast new state
     io.emit("update", stage_bans_dict);
   });
 
@@ -110,7 +95,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// start server
+// Start server
 const port = process.env.PORT || 3000;
 server.listen(port, host, () => {
   console.log(`Server listening on http://${host}:${port}`);
@@ -123,7 +108,7 @@ function initStageBans() {
   return stage_bans_dict;
 }
 
-// Append unbanned stages from folder_name into an existing stage_bans_dict
+// Set all stages from within folder_name as unbanned in stage_bans_dict
 function populateStageIsBannedDict(folder_name, stage_bans_dict) {
   try {
     const files = fs.readdirSync(path.join(__dirname, folder_name));
@@ -131,7 +116,7 @@ function populateStageIsBannedDict(folder_name, stage_bans_dict) {
       /\.(jpe?g|png|gif)$/i.test(file)
     );
     image_filenames.forEach(
-      (element) => (stage_bans_dict[path.join(folder_name, element)] = true)
+      (element) => (stage_bans_dict[path.join(folder_name, element)] = false)
     );
   } catch (err) {
     console.error(

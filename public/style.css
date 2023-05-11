@@ -1,72 +1,75 @@
 body {
-    background-color: #333;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
+  background-color: #333;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .stage-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    margin: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
 }
 
-.starter-container, .counterpick-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
+.starter-container,
+.counterpick-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
 }
 
 .starter-container {
-    flex-basis: 100%;
+  flex-basis: 100%;
 }
 
 .stage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 5px;
-    padding: 5px;
-    border: 8px solid transparent;
-    position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5px;
+  padding: 5px;
+  border: 8px solid transparent;
+  position: relative;
 }
 
 .starter-container .stage {
-    border-color: #0f0;
+  border-color: #0f0;
 }
 
 .counterpick-container .stage {
-    border-color: #ff0;
+  border-color: #ff0;
 }
 
 .stage img {
-    width: 100%;
-    height: auto;
-    opacity: 1;
+  width: 100%;
+  height: auto;
+  opacity: 1;
+  pointer-events: none;
+  user-select: none;
 }
 
 .stage.disabled img {
-    opacity: 0.5;
+  opacity: 0.5;
 }
 
 .strike {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("strike.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("strike.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 2;
 }
 
 .stage.disabled {
-    border-color: red;
+  border-color: red;
 }

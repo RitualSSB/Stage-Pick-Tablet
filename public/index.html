@@ -13,10 +13,6 @@
       <div class="counterpick-container"></div>
     </div>
     <script>
-      const startersContainer = document.querySelector(".starter-container");
-      const counterpicksContainer = document.querySelector(
-        ".counterpick-container"
-      );
       const socket = io();
       var stages_initialized = false;
 
@@ -34,6 +30,7 @@
         return container;
       }
 
+      // Dynamically fetches stage html from server
       function initStages(stage_type, parent) {
         return fetch(stage_type)
           .then((response) => response.text())
@@ -49,6 +46,7 @@
           });
       }
 
+      // Updates stage html to reflect stage_bans_dict
       function updateStageBans(stage_bans_dict) {
         Object.entries(stage_bans_dict).forEach(
           ([stage, is_banned_on_server]) => {
@@ -60,6 +58,22 @@
             }
           }
         );
+      }
+
+      // Toggle a stage's banned state
+      function strikeOutStage(stage_container) {
+        if (stage_container.classList.contains("disabled")) {
+          // clear the strike functionality
+          stage_container.classList.remove("disabled");
+          const strike = stage_container.querySelector(".strike");
+          strike.remove();
+        } else {
+          // add the strike functionality
+          stage_container.classList.add("disabled");
+          const strike = document.createElement("div");
+          strike.classList.add("strike");
+          stage_container.appendChild(strike);
+        }
       }
 
       // Function to strike out a stage
@@ -79,66 +93,35 @@
         console.log("emitting update");
       }
 
-      function strikeOutStage(stage_container) {
-        if (stage_container.classList.contains("disabled")) {
-          // clear the strike functionality
-          stage_container.classList.remove("disabled");
-          const strike = stage_container.querySelector(".strike");
-          strike.remove();
-        } else {
-          // add the strike functionality
-          stage_container.classList.add("disabled");
-          const strike = document.createElement("div");
-          strike.classList.add("strike");
-          stage_container.appendChild(strike);
-        }
-      }
-
-      // the 'init' message will be sent on connection (or reconnection) to the server.
-      // We want to:
-      // 1) Dynamically populate the Starters and Counterpicks html
-      // 2) Synchronize the state of the bans with the server
+      // On connection to the server
       socket.on("init", (stage_bans_dict) => {
-        console.log("init");
-        // We only want to add the stages on first connection. Otherwise we get duplicate stages on reconnection.
-        if (!stages_initialized) {
-          promise_starters = initStages("Starters", startersContainer);
-          promise_counterpicks = initStages(
-            "Counterpicks",
-            counterpicksContainer
-          );
-          stages_initialized = true;
-          // We await all stage elements to exist before trying to update them.
-          Promise.all([promise_starters, promise_counterpicks]).then(() => {
-            updateStageBans(stage_bans_dict);
-          });
-        } else {
+        // Avoid duplicating stages on reconnect
+        if (stages_initialized) {
           updateStageBans(stage_bans_dict);
+          return;
         }
+        // Dynamically populate the stages
+        promise_starters = initStages(
+          "Starters",
+          document.querySelector(".starter-container")
+        );
+        promise_counterpicks = initStages(
+          "Counterpicks",
+          document.querySelector(".counterpick-container")
+        );
+        stages_initialized = true;
+
+        // Wait for stages to fully populate
+        Promise.all([promise_starters, promise_counterpicks]).then(() => {
+          // Synchronize the state of the bans with the server
+          updateStageBans(stage_bans_dict);
+        });
       });
 
+      // When server state changes
       socket.on("update", (stage_bans_dict) => {
-        console.log("updating");
-        console.log(stage_bans_dict);
         updateStageBans(stage_bans_dict);
       });
-
-      /*
-      if (message.action === 'strike') {
-        const stage = document.querySelector(`img[src="${message.stage}"]`).parentNode;
-        if (message.disabled) {
-          // disable the stage
-          stage.classList.add('disabled');
-          const strike = document.createElement('div');
-          strike.classList.add('strike');
-          stage.appendChild(strike);
-        } else {
-          // enable the stage
-          stage.classList.remove('disabled');
-          const strike = stage.querySelector('.strike');
-          strike.remove();
-        }
-      }*/
     </script>
   </body>
 </html>
